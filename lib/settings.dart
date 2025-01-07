@@ -4,8 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 class SettingsPage extends StatelessWidget {
-  final bool useESenseGyro;
-  final ValueChanged<bool> onToggleGyro;
+  final ValueChanged<bool> onToggleSensor;
   final ESenseManager eSenseManager;
   final String eSenseDeviceStatus;
   final Future<void> Function() onConnectESense;
@@ -14,11 +13,12 @@ class SettingsPage extends StatelessWidget {
   final ValueChanged<int> onSamplingRateChanged;
   final ThemeMode themeMode;
   final ValueChanged<ThemeMode> onThemeModeChanged;
+  final bool useESenseSensor;
 
   const SettingsPage({
     super.key,
-    required this.useESenseGyro,
-    required this.onToggleGyro,
+    required this.useESenseSensor,
+    required this.onToggleSensor,
     required this.eSenseManager,
     required this.eSenseDeviceStatus,
     required this.onConnectESense,
@@ -44,11 +44,11 @@ class SettingsPage extends StatelessWidget {
                 title: const Text('Use eSense Sensor'),
                 leading: Icon(
                   Icons.sensors,
-                  color: useESenseGyro ? Colors.blue : null,
+                  color: useESenseSensor ? Colors.blue : null,
                 ),
-                initialValue: useESenseGyro,
+                initialValue: useESenseSensor,
                 onToggle: (bool value) {
-                  onToggleGyro(value);
+                  onToggleSensor(value);
                 },
                 enabled: eSenseManager.connected,
               ),

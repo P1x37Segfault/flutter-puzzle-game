@@ -351,8 +351,8 @@ class MyAppState extends State<MyApp> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => SettingsPage(
-                                      useESenseGyro: useESenseSensor,
-                                      onToggleGyro: (bool value) {
+                                      useESenseSensor: useESenseSensor,
+                                      onToggleSensor: (bool value) {
                                         setState(() {
                                           useESenseSensor = value;
                                         });
