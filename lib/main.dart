@@ -57,14 +57,6 @@ class MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _listenToESense();
-    double ms = 1000 / samplingRate;
-    Duration sensorInterval = Duration(milliseconds: ms.round());
-    accelerometerEventStream(samplingPeriod: sensorInterval)
-        .listen((AccelerometerEvent event) {
-      setState(() {
-        _deviceAcc = [event.x, event.y, event.z];
-      });
-    });
   }
 
   StreamSubscription? deviceGyroSubscription;
@@ -256,7 +248,7 @@ class MyAppState extends State<MyApp> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       const Text(
-                        'Flutter eSense App',
+                        'Flutter Puzzle Game',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -324,15 +316,13 @@ class MyAppState extends State<MyApp> {
                                       samplingRate: samplingRate,
                                     ),
                                   ),
-                                ).then((_) {
-                                  _stopSampling();
-                                });
+                                ).then((_) => _stopSampling());
                               },
                               style: OutlinedButton.styleFrom(
                                 side: const BorderSide(color: Colors.white),
                               ),
                               child: const Text(
-                                'Check Sensors',
+                                'Debug',
                                 style: TextStyle(
                                     fontSize: 20, color: Colors.white),
                               ),
