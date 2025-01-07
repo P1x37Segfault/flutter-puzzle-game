@@ -7,10 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sensors_plus/sensors_plus.dart';
-import 'about.dart';
 import 'settings.dart';
 import 'observe_sensors.dart';
 import 'game.dart';
+import 'how_to_play.dart';
 
 void main() {
   // this forces the orientation to be portrait and locks it
@@ -399,14 +399,15 @@ class MyAppState extends State<MyApp> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => const AboutPage()),
+                                      builder: (context) =>
+                                          const HowToPlayPage()),
                                 );
                               },
                               style: OutlinedButton.styleFrom(
                                 side: const BorderSide(color: Colors.white),
                               ),
                               child: const Text(
-                                'About',
+                                'How to Play',
                                 style: TextStyle(
                                     fontSize: 20, color: Colors.white),
                               ),
