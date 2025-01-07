@@ -13,10 +13,10 @@ class GamePage extends StatefulWidget {
   });
 
   @override
-  _GamePageState createState() => _GamePageState();
+  GamePageState createState() => GamePageState();
 }
 
-class _GamePageState extends State<GamePage> {
+class GamePageState extends State<GamePage> {
   var useESenseSensor = false;
   final double gestureThreshold = 50;
   final List<double> gyroXValues = [];
@@ -31,14 +31,21 @@ class _GamePageState extends State<GamePage> {
   bool canDetectGesture = true;
 
   String detectedGesture = ''; // Detected gesture
+  Timer? _timer; // Timer for periodic updates
 
   @override
   void initState() {
     super.initState();
-    Timer.periodic(const Duration(milliseconds: 100), (timer) {
+    _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       updateGyroData(widget.gyroData);
       updateApplePosition();
     });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // Cancel the timer when disposing the widget
+    super.dispose();
   }
 
   void updateGyroData(List<double> gyroData) {
@@ -60,7 +67,8 @@ class _GamePageState extends State<GamePage> {
       } else if (currentGyroY < -gestureThreshold) {
         detectedGesture = 'Nod Up';
         rotatePieceClockwise();
-      } else if (currentGyroZ > gestureThreshold || currentGyroZ < -gestureThreshold) {
+      } else if (currentGyroZ > gestureThreshold ||
+          currentGyroZ < -gestureThreshold) {
         detectedGesture = 'Shake Head';
         shufflePieces();
       } else {

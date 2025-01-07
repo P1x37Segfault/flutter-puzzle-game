@@ -18,10 +18,10 @@ class ObserveSensorsPage extends StatefulWidget {
       required this.useESenseSensor});
 
   @override
-  _ObserveSensorsPageState createState() => _ObserveSensorsPageState();
+  ObserveSensorsPageState createState() => ObserveSensorsPageState();
 }
 
-class _ObserveSensorsPageState extends State<ObserveSensorsPage> {
+class ObserveSensorsPageState extends State<ObserveSensorsPage> {
   List<FlSpot> gyroXSpots = [];
   List<FlSpot> gyroYSpots = [];
   List<FlSpot> gyroZSpots = [];
@@ -31,11 +31,12 @@ class _ObserveSensorsPageState extends State<ObserveSensorsPage> {
   double time = 0;
 
   var useESenseSensor = false;
+  Timer? _timer; // Timer for periodic updates
 
   @override
   void initState() {
     super.initState();
-    Timer.periodic(const Duration(milliseconds: 50), (timer) {
+    _timer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
       setState(() {
         time += 0.05; // Adjusted time increment
         gyroXSpots.add(FlSpot(time, widget.gyroData[0]));
@@ -58,6 +59,12 @@ class _ObserveSensorsPageState extends State<ObserveSensorsPage> {
   }
 
   @override
+  void dispose() {
+    _timer?.cancel(); // Cancel the timer when disposing the widget
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -73,7 +80,8 @@ class _ObserveSensorsPageState extends State<ObserveSensorsPage> {
             ),
             const SizedBox(height: 10),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0), // Added padding
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0), // Added padding
               child: SizedBox(
                 height: 200,
                 child: LineChart(
@@ -121,7 +129,8 @@ class _ObserveSensorsPageState extends State<ObserveSensorsPage> {
             ),
             const SizedBox(height: 10),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0), // Added padding
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0), // Added padding
               child: SizedBox(
                 height: 200,
                 child: LineChart(
