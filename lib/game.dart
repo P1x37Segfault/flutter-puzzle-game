@@ -30,11 +30,7 @@ class _GamePageState extends State<GamePage> {
   bool gestureDetected = false;
   bool canDetectGesture = true;
 
-  int playerPosition = 0; // Player position in the game
   String detectedGesture = ''; // Detected gesture
-  double applePositionX = 0.0; // Apple position
-  double applePositionY = 0.0; // Apple position
-  int score = 0; // Player score
 
   @override
   void initState() {
@@ -107,9 +103,7 @@ class _GamePageState extends State<GamePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('Player Position: $playerPosition'),
             Text('Detected Gesture: $detectedGesture'),
-            Text('Score: $score'),
           ],
         ),
       ),
