@@ -4,33 +4,66 @@ import 'package:flutter/material.dart';
 
 class GamePage extends StatefulWidget {
   final List<double> gyroData;
-  final List<double> accData;
 
   const GamePage({
     super.key,
     required this.gyroData,
-    required this.accData,
   });
 
   @override
   GamePageState createState() => GamePageState();
 }
 
+enum Axis {
+  X,
+  Y,
+  Z,
+}
+
+enum Gesture {
+  tiltForward,
+  tiltBackward,
+  tiltLeft,
+  tiltRight,
+  turnLeft,
+  turnRight,
+  unknown
+}
+
+extension GestureExtension on Gesture {
+  String get name {
+    switch (this) {
+      case Gesture.tiltForward:
+        return 'Tilt Forward';
+      case Gesture.tiltBackward:
+        return 'Tilt Backward';
+      case Gesture.tiltLeft:
+        return 'Tilt Left';
+      case Gesture.tiltRight:
+        return 'Tilt Right';
+      case Gesture.turnLeft:
+        return 'Turn Left';
+      case Gesture.turnRight:
+        return 'Turn Right';
+      default:
+        return 'Unknown';
+    }
+  }
+}
+
 class GamePageState extends State<GamePage> {
   var useESenseSensor = false;
-  final double gestureThreshold = 50;
-  final List<double> gyroXValues = [];
-  final List<double> gyroYValues = [];
-  final List<double> gyroZValues = [];
-  final int smoothingWindowSize = 10;
+  final double gestureThreshold =
+      21; // TODO: different threshhold for device (100) vs esense (21)
+  final int gestureCooldown = 1000;
 
-  double currentGyroX = 0.0;
-  double currentGyroY = 0.0;
-  double currentGyroZ = 0.0;
+  double _x = 0.0;
+  double _y = 0.0;
+  double _z = 0.0;
   bool gestureDetected = false;
   bool canDetectGesture = true;
 
-  String detectedGesture = ''; // Detected gesture
+  Gesture detectedGesture = Gesture.unknown; // Detected gesture
   Timer? _timer; // Timer for periodic updates
 
   @override
@@ -38,7 +71,6 @@ class GamePageState extends State<GamePage> {
     super.initState();
     _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       updateGyroData(widget.gyroData);
-      updateApplePosition();
     });
   }
 
@@ -49,56 +81,87 @@ class GamePageState extends State<GamePage> {
   }
 
   void updateGyroData(List<double> gyroData) {
-    setState(() {
-      currentGyroX = gyroData[0];
-      currentGyroY = gyroData[1];
-      currentGyroZ = gyroData[2];
+    if (!canDetectGesture) {
+      return;
+    }
 
-      // Detect head gestures
-      if (currentGyroX > gestureThreshold) {
-        detectedGesture = 'Tilt Right';
-        movePieceRight();
-      } else if (currentGyroX < -gestureThreshold) {
-        detectedGesture = 'Tilt Left';
-        movePieceLeft();
-      } else if (currentGyroY > gestureThreshold) {
-        detectedGesture = 'Nod Down';
-        rotatePieceCounterClockwise();
-      } else if (currentGyroY < -gestureThreshold) {
-        detectedGesture = 'Nod Up';
-        rotatePieceClockwise();
-      } else if (currentGyroZ > gestureThreshold ||
-          currentGyroZ < -gestureThreshold) {
-        detectedGesture = 'Shake Head';
-        shufflePieces();
+    setState(() {
+      _x = gyroData[0];
+      _y = gyroData[1];
+      _z = gyroData[2];
+
+      // the device orientation is as follows:
+      // X is left
+      // Y is backward
+      // Z is down
+
+      // determine the axis with the highest absolute value
+      Axis axis;
+      if (_x.abs() < _y.abs() && _z.abs() < _y.abs()) {
+        axis = Axis.Y;
+      } else if (_x.abs() < _z.abs() && _y.abs() < _z.abs()) {
+        axis = Axis.Z;
       } else {
-        detectedGesture = '';
+        axis = Axis.X;
+      }
+
+      // detect gesture
+      switch (axis) {
+        case Axis.X:
+          checkForwardBackwardTilt(_x);
+          break;
+        case Axis.Y:
+          checkLeftRightTilt(_y);
+          break;
+        case Axis.Z:
+          checkLeftRightTurn(_z);
+          break;
+      }
+
+      if (gestureDetected) {
+        canDetectGesture = false;
+        Future.delayed(Duration(milliseconds: gestureCooldown), () {
+          gestureDetected = false;
+          canDetectGesture = true;
+        });
       }
     });
   }
 
-  void movePieceLeft() {
-    // Logic to move the puzzle piece to the left
+  void checkForwardBackwardTilt(double xVal) {
+    if (xVal < -gestureThreshold) {
+      detectedGesture = Gesture.tiltForward;
+      gestureDetected = true;
+    } else if (xVal > gestureThreshold) {
+      detectedGesture = Gesture.tiltBackward;
+      gestureDetected = true;
+    } else {
+      gestureDetected = false;
+    }
   }
 
-  void movePieceRight() {
-    // Logic to move the puzzle piece to the right
+  void checkLeftRightTilt(double yVal) {
+    if (yVal < -gestureThreshold) {
+      detectedGesture = Gesture.tiltLeft;
+      gestureDetected = true;
+    } else if (yVal > gestureThreshold) {
+      detectedGesture = Gesture.tiltRight;
+      gestureDetected = true;
+    } else {
+      gestureDetected = false;
+    }
   }
 
-  void rotatePieceClockwise() {
-    // Logic to rotate the puzzle piece clockwise
-  }
-
-  void rotatePieceCounterClockwise() {
-    // Logic to rotate the puzzle piece counterclockwise
-  }
-
-  void shufflePieces() {
-    // Logic to shuffle the puzzle pieces
-  }
-
-  void updateApplePosition() {
-    // Update apple position logic
+  void checkLeftRightTurn(double zVal) {
+    if (zVal > gestureThreshold) {
+      detectedGesture = Gesture.turnLeft;
+      gestureDetected = true;
+    } else if (zVal < -gestureThreshold) {
+      detectedGesture = Gesture.turnRight;
+      gestureDetected = true;
+    } else {
+      gestureDetected = false;
+    }
   }
 
   @override
@@ -111,7 +174,18 @@ class GamePageState extends State<GamePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('Detected Gesture: $detectedGesture'),
+            Text(detectedGesture != Gesture.unknown
+                ? 'Detected Gesture: ${detectedGesture.name}'
+                : 'No Gesture detected'),
+            const SizedBox(height: 20),
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: canDetectGesture ? Colors.green : Colors.red,
+              ),
+            ),
           ],
         ),
       ),

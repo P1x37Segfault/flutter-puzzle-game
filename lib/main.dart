@@ -8,9 +8,9 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'settings.dart';
-import 'observe_sensors.dart';
 import 'game.dart';
 import 'how_to_play.dart';
+import 'observe_sensors.dart';
 
 void main() {
   // this forces the orientation to be portrait and locks it
@@ -117,6 +117,7 @@ class MyAppState extends State<MyApp> {
             break;
           case ConnectionType.disconnected:
             eSenseDeviceStatus = 'disconnected';
+            // TODO:  make sure useEsenseSensor is set to false
             _pauseListenToESenseSensorEvents();
             break;
           case ConnectionType.device_found:
@@ -273,9 +274,6 @@ class MyAppState extends State<MyApp> {
                                       gyroData: useESenseSensor
                                           ? _eSenseGyroReoriented
                                           : _deviceGyro,
-                                      accData: useESenseSensor
-                                          ? _eSenseAccReoriented
-                                          : _deviceAcc,
                                     ),
                                   ),
                                 ).then((_) {
