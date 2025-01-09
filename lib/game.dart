@@ -39,7 +39,7 @@ class GamePageState extends State<GamePage> {
   var useESenseSensor = false;
   final double gestureThresholdESense = 21;
   final double gestureThresholdDevice = 75;
-  final int gestureCooldown = 750;
+  final int gestureCooldown = 500;
 
   double _x = 0.0;
   double _y = 0.0;
@@ -57,6 +57,8 @@ class GamePageState extends State<GamePage> {
   Color rightArrowColor = Colors.grey;
   Color turnLeftArrowColor = Colors.grey;
   Color turnRightArrowColor = Colors.grey;
+
+  int score = 0; // Score indicator
 
   @override
   void initState() {
@@ -97,6 +99,7 @@ class GamePageState extends State<GamePage> {
       if (gestureDetected) {
         canDetectGesture = false;
         updateArrowColors(detectedGesture);
+        score++; // Increment score when a gesture is detected
         Future.delayed(Duration(milliseconds: gestureCooldown), () {
           gestureDetected = false;
           canDetectGesture = true;
@@ -170,13 +173,16 @@ class GamePageState extends State<GamePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Text('Score: $score', style: const TextStyle(fontSize: 24)),
+            const SizedBox(height: 30),
             Container(
               padding: const EdgeInsets.all(5),
               decoration: BoxDecoration(
                 color: forwardArrowColor,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.arrow_upward, size: 60, color: Colors.white),
+              child:
+                  const Icon(Icons.arrow_upward, size: 60, color: Colors.white),
             ),
             const SizedBox(height: 30),
             Row(
@@ -188,7 +194,8 @@ class GamePageState extends State<GamePage> {
                     color: leftArrowColor,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.arrow_back, size: 60, color: Colors.white),
+                  child: const Icon(Icons.arrow_back,
+                      size: 60, color: Colors.white),
                 ),
                 const SizedBox(width: 121),
                 Container(
@@ -197,7 +204,8 @@ class GamePageState extends State<GamePage> {
                     color: rightArrowColor,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.arrow_forward, size: 60, color: Colors.white),
+                  child: const Icon(Icons.arrow_forward,
+                      size: 60, color: Colors.white),
                 ),
               ],
             ),
@@ -208,7 +216,8 @@ class GamePageState extends State<GamePage> {
                 color: backwardArrowColor,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.arrow_downward, size: 60, color: Colors.white),
+              child: const Icon(Icons.arrow_downward,
+                  size: 60, color: Colors.white),
             ),
           ],
         ),
