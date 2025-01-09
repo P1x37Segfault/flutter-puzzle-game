@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 
 class GamePage extends StatefulWidget {
   final List<double> gyroData;
+  final bool useESenseSensor;
 
   const GamePage({
     super.key,
     required this.gyroData,
+    required this.useESenseSensor,
   });
 
   @override
@@ -53,9 +55,9 @@ extension GestureExtension on Gesture {
 
 class GamePageState extends State<GamePage> {
   var useESenseSensor = false;
-  final double gestureThreshold =
-      21; // TODO: different threshhold for device (100) vs esense (21)
-  final int gestureCooldown = 1000;
+  final double gestureThresholdESense = 21;
+  final double gestureThresholdDevice = 75;
+  final int gestureCooldown = 750;
 
   double _x = 0.0;
   double _y = 0.0;
@@ -95,27 +97,11 @@ class GamePageState extends State<GamePage> {
       // Y is backward
       // Z is down
 
-      // determine the axis with the highest absolute value
-      Axis axis;
-      if (_x.abs() < _y.abs() && _z.abs() < _y.abs()) {
-        axis = Axis.Y;
-      } else if (_x.abs() < _z.abs() && _y.abs() < _z.abs()) {
-        axis = Axis.Z;
+      // check which axis has the highest tilt
+      if (_x.abs() < _y.abs()) {
+        checkLeftRightTilt(_y);
       } else {
-        axis = Axis.X;
-      }
-
-      // detect gesture
-      switch (axis) {
-        case Axis.X:
-          checkForwardBackwardTilt(_x);
-          break;
-        case Axis.Y:
-          checkLeftRightTilt(_y);
-          break;
-        case Axis.Z:
-          checkLeftRightTurn(_z);
-          break;
+        checkForwardBackwardTilt(_x);
       }
 
       if (gestureDetected) {
@@ -129,6 +115,8 @@ class GamePageState extends State<GamePage> {
   }
 
   void checkForwardBackwardTilt(double xVal) {
+    double gestureThreshold =
+        useESenseSensor ? gestureThresholdESense : gestureThresholdDevice;
     if (xVal < -gestureThreshold) {
       detectedGesture = Gesture.tiltForward;
       gestureDetected = true;
@@ -141,6 +129,8 @@ class GamePageState extends State<GamePage> {
   }
 
   void checkLeftRightTilt(double yVal) {
+    double gestureThreshold =
+        useESenseSensor ? gestureThresholdESense : gestureThresholdDevice;
     if (yVal < -gestureThreshold) {
       detectedGesture = Gesture.tiltLeft;
       gestureDetected = true;

@@ -117,7 +117,7 @@ class MyAppState extends State<MyApp> {
             break;
           case ConnectionType.disconnected:
             eSenseDeviceStatus = 'disconnected';
-            // TODO:  make sure useEsenseSensor is set to false
+            useESenseSensor = false;
             _pauseListenToESenseSensorEvents();
             break;
           case ConnectionType.device_found:
@@ -154,6 +154,8 @@ class MyAppState extends State<MyApp> {
 
   StreamSubscription? eSenseSubscription;
   void _startListenToESenseSensorEvents() async {
+    if (!eSenseConnected) return;
+
     // any changes to the sampling frequency must be done BEFORE listening to sensor events
     await eSenseManager.setSamplingRate(samplingRate);
 
@@ -200,22 +202,18 @@ class MyAppState extends State<MyApp> {
     setState(() {
       sampling = true;
     });
-    if (useESenseSensor) {
-      _startListenToESenseSensorEvents();
-    } else {
-      _startListenToDeviceSensorEvents();
-    }
+
+    _startListenToESenseSensorEvents();
+    _startListenToDeviceSensorEvents();
   }
 
   void _stopSampling() {
     setState(() {
       sampling = false;
     });
-    if (useESenseSensor) {
-      _pauseListenToESenseSensorEvents();
-    } else {
-      _pauseListenToDeviceSensorEvents();
-    }
+
+    _pauseListenToESenseSensorEvents();
+    _pauseListenToDeviceSensorEvents();
   }
 
   @override
@@ -274,6 +272,7 @@ class MyAppState extends State<MyApp> {
                                       gyroData: useESenseSensor
                                           ? _eSenseGyroReoriented
                                           : _deviceGyro,
+                                      useESenseSensor: useESenseSensor,
                                     ),
                                   ),
                                 ).then((_) {
