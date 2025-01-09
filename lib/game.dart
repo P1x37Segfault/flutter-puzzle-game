@@ -16,21 +16,7 @@ class GamePage extends StatefulWidget {
   GamePageState createState() => GamePageState();
 }
 
-enum Axis {
-  X,
-  Y,
-  Z,
-}
-
-enum Gesture {
-  tiltForward,
-  tiltBackward,
-  tiltLeft,
-  tiltRight,
-  turnLeft,
-  turnRight,
-  unknown
-}
+enum Gesture { tiltForward, tiltBackward, tiltLeft, tiltRight, unknown }
 
 extension GestureExtension on Gesture {
   String get name {
@@ -43,10 +29,6 @@ extension GestureExtension on Gesture {
         return 'Tilt Left';
       case Gesture.tiltRight:
         return 'Tilt Right';
-      case Gesture.turnLeft:
-        return 'Turn Left';
-      case Gesture.turnRight:
-        return 'Turn Right';
       default:
         return 'Unknown';
     }
@@ -67,6 +49,14 @@ class GamePageState extends State<GamePage> {
 
   Gesture detectedGesture = Gesture.unknown; // Detected gesture
   Timer? _timer; // Timer for periodic updates
+
+  // Define colors for each arrow
+  Color forwardArrowColor = Colors.grey;
+  Color backwardArrowColor = Colors.grey;
+  Color leftArrowColor = Colors.grey;
+  Color rightArrowColor = Colors.grey;
+  Color turnLeftArrowColor = Colors.grey;
+  Color turnRightArrowColor = Colors.grey;
 
   @override
   void initState() {
@@ -106,9 +96,11 @@ class GamePageState extends State<GamePage> {
 
       if (gestureDetected) {
         canDetectGesture = false;
+        updateArrowColors(detectedGesture);
         Future.delayed(Duration(milliseconds: gestureCooldown), () {
           gestureDetected = false;
           canDetectGesture = true;
+          resetArrowColors();
         });
       }
     });
@@ -142,16 +134,30 @@ class GamePageState extends State<GamePage> {
     }
   }
 
-  void checkLeftRightTurn(double zVal) {
-    if (zVal > gestureThreshold) {
-      detectedGesture = Gesture.turnLeft;
-      gestureDetected = true;
-    } else if (zVal < -gestureThreshold) {
-      detectedGesture = Gesture.turnRight;
-      gestureDetected = true;
-    } else {
-      gestureDetected = false;
+  void updateArrowColors(Gesture gesture) {
+    switch (gesture) {
+      case Gesture.tiltForward:
+        forwardArrowColor = Colors.green;
+        break;
+      case Gesture.tiltBackward:
+        backwardArrowColor = Colors.green;
+        break;
+      case Gesture.tiltLeft:
+        leftArrowColor = Colors.green;
+        break;
+      case Gesture.tiltRight:
+        rightArrowColor = Colors.green;
+        break;
+      default:
+        break;
     }
+  }
+
+  void resetArrowColors() {
+    forwardArrowColor = Colors.grey;
+    backwardArrowColor = Colors.grey;
+    leftArrowColor = Colors.grey;
+    rightArrowColor = Colors.grey;
   }
 
   @override
@@ -164,17 +170,45 @@ class GamePageState extends State<GamePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(detectedGesture != Gesture.unknown
-                ? 'Detected Gesture: ${detectedGesture.name}'
-                : 'No Gesture detected'),
-            const SizedBox(height: 20),
             Container(
-              width: 50,
-              height: 50,
+              padding: const EdgeInsets.all(5),
               decoration: BoxDecoration(
+                color: forwardArrowColor,
                 shape: BoxShape.circle,
-                color: canDetectGesture ? Colors.green : Colors.red,
               ),
+              child: const Icon(Icons.arrow_upward, size: 60, color: Colors.white),
+            ),
+            const SizedBox(height: 30),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: leftArrowColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.arrow_back, size: 60, color: Colors.white),
+                ),
+                const SizedBox(width: 121),
+                Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: rightArrowColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.arrow_forward, size: 60, color: Colors.white),
+                ),
+              ],
+            ),
+            const SizedBox(height: 30),
+            Container(
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                color: backwardArrowColor,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.arrow_downward, size: 60, color: Colors.white),
             ),
           ],
         ),
