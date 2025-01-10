@@ -14,6 +14,8 @@ class SettingsPage extends StatelessWidget {
   final ThemeMode themeMode;
   final ValueChanged<ThemeMode> onThemeModeChanged;
   final bool useESenseSensor;
+  final double sensitivity;
+  final ValueChanged<double> onSensitivityChanged;
 
   const SettingsPage({
     super.key,
@@ -27,6 +29,8 @@ class SettingsPage extends StatelessWidget {
     required this.onSamplingRateChanged,
     required this.themeMode,
     required this.onThemeModeChanged,
+    required this.sensitivity,
+    required this.onSensitivityChanged,
   });
 
   @override
@@ -86,6 +90,20 @@ class SettingsPage extends StatelessWidget {
                     if (value != null) {
                       onThemeModeChanged(value);
                     }
+                  },
+                ),
+              ),
+              SettingsTile(
+                title: const Text('Sensitivity'),
+                leading: const Icon(Icons.tune),
+                trailing: Slider(
+                  value: sensitivity,
+                  min: 0.5,
+                  max: 1.5,
+                  divisions: 10,
+                  label: sensitivity.toStringAsFixed(1),
+                  onChanged: (double value) {
+                    onSensitivityChanged(value);
                   },
                 ),
               ),

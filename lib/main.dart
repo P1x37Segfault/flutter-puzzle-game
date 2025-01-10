@@ -9,7 +9,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'settings.dart';
 import 'game.dart';
-import 'how_to_play.dart';
 import 'observe_sensors.dart';
 
 void main() {
@@ -37,6 +36,7 @@ class MyAppState extends State<MyApp> {
   String eSenseDeviceStatus = '';
   int samplingRate = 100; // in Hz
   ThemeMode themeMode = ThemeMode.system;
+  double sensitivity = 1.0;
 
   // sensor values
   List<double> _eSenseGyro = [0, 0, 0];
@@ -247,7 +247,7 @@ class MyAppState extends State<MyApp> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       const Text(
-                        'Flutter Puzzle Game',
+                        'Memory Game',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -269,6 +269,7 @@ class MyAppState extends State<MyApp> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => GamePage(
+                                      sensitivity: sensitivity,
                                       gyroData: useESenseSensor
                                           ? _eSenseGyroReoriented
                                           : _deviceGyro,
@@ -360,6 +361,12 @@ class MyAppState extends State<MyApp> {
                                           themeMode = mode;
                                         });
                                       },
+                                      sensitivity: sensitivity,
+                                      onSensitivityChanged: (double value) {
+                                        setState(() {
+                                          sensitivity = value;
+                                        });
+                                      },
                                     ),
                                   ),
                                 );
@@ -369,32 +376,6 @@ class MyAppState extends State<MyApp> {
                               ),
                               child: const Text(
                                 'Settings',
-                                style: TextStyle(
-                                    fontSize: 20, color: Colors.white),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      FractionallySizedBox(
-                        widthFactor: 0.5,
-                        child: Builder(
-                          builder: (BuildContext context) {
-                            return OutlinedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const HowToPlayPage()),
-                                );
-                              },
-                              style: OutlinedButton.styleFrom(
-                                side: const BorderSide(color: Colors.white),
-                              ),
-                              child: const Text(
-                                'How to Play',
                                 style: TextStyle(
                                     fontSize: 20, color: Colors.white),
                               ),
