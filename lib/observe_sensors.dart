@@ -84,42 +84,44 @@ class ObserveSensorsPageState extends State<ObserveSensorsPage> {
                   const EdgeInsets.symmetric(horizontal: 16.0), // Added padding
               child: SizedBox(
                 height: 200,
-                child: LineChart(
-                  LineChartData(
-                    gridData: const FlGridData(show: true),
-                    titlesData: const FlTitlesData(show: true),
-                    borderData: FlBorderData(show: true),
-                    lineBarsData: [
-                      LineChartBarData(
-                        spots: gyroXSpots,
-                        isCurved: false,
-                        color: Colors.red,
-                        barWidth: 2,
-                        isStrokeCapRound: true,
-                        dotData: const FlDotData(show: false),
-                        belowBarData: BarAreaData(show: false),
-                      ),
-                      LineChartBarData(
-                        spots: gyroYSpots,
-                        isCurved: false,
-                        color: Colors.green,
-                        barWidth: 2,
-                        isStrokeCapRound: true,
-                        dotData: const FlDotData(show: false),
-                        belowBarData: BarAreaData(show: false),
-                      ),
-                      LineChartBarData(
-                        spots: gyroZSpots,
-                        isCurved: false,
-                        color: Colors.blue,
-                        barWidth: 2,
-                        isStrokeCapRound: true,
-                        dotData: const FlDotData(show: false),
-                        belowBarData: BarAreaData(show: false),
-                      ),
-                    ],
-                  ),
-                ),
+                child: gyroXSpots.isNotEmpty && gyroYSpots.isNotEmpty && gyroZSpots.isNotEmpty
+                    ? LineChart(
+                        LineChartData(
+                          gridData: const FlGridData(show: true),
+                          titlesData: const FlTitlesData(show: true),
+                          borderData: FlBorderData(show: true),
+                          lineBarsData: [
+                            LineChartBarData(
+                              spots: gyroXSpots,
+                              isCurved: false,
+                              color: Colors.red,
+                              barWidth: 2,
+                              isStrokeCapRound: true,
+                              dotData: const FlDotData(show: false),
+                              belowBarData: BarAreaData(show: false),
+                            ),
+                            LineChartBarData(
+                              spots: gyroYSpots,
+                              isCurved: false,
+                              color: Colors.green,
+                              barWidth: 2,
+                              isStrokeCapRound: true,
+                              dotData: const FlDotData(show: false),
+                              belowBarData: BarAreaData(show: false),
+                            ),
+                            LineChartBarData(
+                              spots: gyroZSpots,
+                              isCurved: false,
+                              color: Colors.blue,
+                              barWidth: 2,
+                              isStrokeCapRound: true,
+                              dotData: const FlDotData(show: false),
+                              belowBarData: BarAreaData(show: false),
+                            ),
+                          ],
+                        ),
+                      )
+                    : const Center(child: CircularProgressIndicator()), // Show loading indicator
               ),
             ),
             const SizedBox(height: 30),
@@ -133,42 +135,44 @@ class ObserveSensorsPageState extends State<ObserveSensorsPage> {
                   const EdgeInsets.symmetric(horizontal: 16.0), // Added padding
               child: SizedBox(
                 height: 200,
-                child: LineChart(
-                  LineChartData(
-                    gridData: const FlGridData(show: true),
-                    titlesData: const FlTitlesData(show: true),
-                    borderData: FlBorderData(show: true),
-                    lineBarsData: [
-                      LineChartBarData(
-                        spots: accXSpots,
-                        isCurved: false,
-                        color: Colors.red,
-                        barWidth: 2,
-                        isStrokeCapRound: true,
-                        dotData: const FlDotData(show: false),
-                        belowBarData: BarAreaData(show: false),
-                      ),
-                      LineChartBarData(
-                        spots: accYSpots,
-                        isCurved: false,
-                        color: Colors.green,
-                        barWidth: 2,
-                        isStrokeCapRound: true,
-                        dotData: const FlDotData(show: false),
-                        belowBarData: BarAreaData(show: false),
-                      ),
-                      LineChartBarData(
-                        spots: accZSpots,
-                        isCurved: false,
-                        color: Colors.blue,
-                        barWidth: 2,
-                        isStrokeCapRound: true,
-                        dotData: const FlDotData(show: false),
-                        belowBarData: BarAreaData(show: false),
-                      ),
-                    ],
-                  ),
-                ),
+                child: accXSpots.isNotEmpty && accYSpots.isNotEmpty && accZSpots.isNotEmpty
+                    ? LineChart(
+                        LineChartData(
+                          gridData: const FlGridData(show: true),
+                          titlesData: const FlTitlesData(show: true),
+                          borderData: FlBorderData(show: true),
+                          lineBarsData: [
+                            LineChartBarData(
+                              spots: accXSpots,
+                              isCurved: false,
+                              color: Colors.red,
+                              barWidth: 2,
+                              isStrokeCapRound: true,
+                              dotData: const FlDotData(show: false),
+                              belowBarData: BarAreaData(show: false),
+                            ),
+                            LineChartBarData(
+                              spots: accYSpots,
+                              isCurved: false,
+                              color: Colors.green,
+                              barWidth: 2,
+                              isStrokeCapRound: true,
+                              dotData: const FlDotData(show: false),
+                              belowBarData: BarAreaData(show: false),
+                            ),
+                            LineChartBarData(
+                              spots: accZSpots,
+                              isCurved: false,
+                              color: Colors.blue,
+                              barWidth: 2,
+                              isStrokeCapRound: true,
+                              dotData: const FlDotData(show: false),
+                              belowBarData: BarAreaData(show: false),
+                            ),
+                          ],
+                        ),
+                      )
+                    : const Center(child: CircularProgressIndicator()), // Show loading indicator
               ),
             ),
             const SizedBox(height: 20),
