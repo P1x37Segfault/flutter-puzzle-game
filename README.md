@@ -1,3 +1,3 @@
-# Flutter Puzzle Game
+# Flutter Memory Game
 
-A new Flutter project.
+A simple Memory Game using the Gyro Sensor to detect Gestures.
