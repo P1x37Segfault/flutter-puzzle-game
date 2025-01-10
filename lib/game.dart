@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'widgets/circular_icon.dart';
 
 class GamePage extends StatefulWidget {
   final List<double> gyroData;
@@ -18,78 +20,160 @@ class GamePage extends StatefulWidget {
 
 enum Gesture { tiltForward, tiltBackward, tiltLeft, tiltRight, unknown }
 
-extension GestureExtension on Gesture {
-  String get name {
-    switch (this) {
-      case Gesture.tiltForward:
-        return 'Tilt Forward';
-      case Gesture.tiltBackward:
-        return 'Tilt Backward';
-      case Gesture.tiltLeft:
-        return 'Tilt Left';
-      case Gesture.tiltRight:
-        return 'Tilt Right';
-      default:
-        return 'Unknown';
-    }
-  }
-}
+enum SoundType { sequence, wrong, correct, point, gameover }
 
 class GamePageState extends State<GamePage> {
-  var useESenseSensor = false;
   final double gestureThresholdESense = 21;
   final double gestureThresholdDevice = 75;
   final int gestureCooldown = 500;
 
   double _x = 0.0;
   double _y = 0.0;
-  double _z = 0.0;
+  // double _z = 0.0;
+
   bool gestureDetected = false;
   bool canDetectGesture = true;
+  bool isUserTurn = false;
+  bool gameStarted = false;
 
-  Gesture detectedGesture = Gesture.unknown; // Detected gesture
-  Timer? _timer; // Timer for periodic updates
+  Gesture detectedGesture = Gesture.unknown;
+  List<Gesture> sequence = [];
+  List<Gesture> userInput = [];
 
-  // Define colors for each arrow
   Color forwardArrowColor = Colors.grey;
   Color backwardArrowColor = Colors.grey;
   Color leftArrowColor = Colors.grey;
   Color rightArrowColor = Colors.grey;
-  Color turnLeftArrowColor = Colors.grey;
-  Color turnRightArrowColor = Colors.grey;
 
-  int score = 0; // Score indicator
+  int score = 0;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      updateGyroData(widget.gyroData);
+      if (gameStarted && isUserTurn && canDetectGesture) {
+        detectGesture(widget.gyroData);
+      }
     });
   }
 
   @override
   void dispose() {
-    _timer?.cancel(); // Cancel the timer when disposing the widget
+    _timer?.cancel();
     super.dispose();
   }
 
-  void updateGyroData(List<double> gyroData) {
-    if (!canDetectGesture) {
-      return;
-    }
+  void startNewGame() async {
+    sequence.clear();
+    userInput.clear();
+    score = 0;
+    await Future.delayed(const Duration(milliseconds: 500));
+    addNewGestureToSequence();
+  }
 
+  void addNewGestureToSequence() async {
+    setState(() {
+      sequence.add(Gesture.values[Random().nextInt(4)]);
+      userInput.clear();
+    });
+    await playSequence();
+    setState(() {
+      isUserTurn = true;
+    });
+  }
+
+  Future<void> playSequence() async {
+    await Future.delayed(const Duration(milliseconds: 750));
+    for (var gesture in sequence) {
+      await highlightGesture(gesture, Colors.orange);
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
+  }
+
+  Future<void> highlightGesture(Gesture gesture, Color color) async {
+    setState(() {
+      switch (gesture) {
+        case Gesture.tiltForward:
+          forwardArrowColor = color;
+          break;
+        case Gesture.tiltBackward:
+          backwardArrowColor = color;
+          break;
+        case Gesture.tiltLeft:
+          leftArrowColor = color;
+          break;
+        case Gesture.tiltRight:
+          rightArrowColor = color;
+          break;
+        default:
+          break;
+      }
+    });
+
+    // wait for a while before resetting the color
+    await Future.delayed(Duration(milliseconds: gestureCooldown));
+    resetArrowColors();
+  }
+
+  void resetArrowColors() {
+    forwardArrowColor = Colors.grey;
+    backwardArrowColor = Colors.grey;
+    leftArrowColor = Colors.grey;
+    rightArrowColor = Colors.grey;
+  }
+
+  void checkUserInput(Gesture gesture) async {
+    if (!isUserTurn) return;
+
+    userInput.add(gesture);
+    int currentIndex = userInput.length - 1;
+    if (userInput[currentIndex] != sequence[currentIndex]) {
+      isUserTurn = false;
+      await highlightGesture(detectedGesture, Colors.red);
+      // game over
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Game Over'),
+              content: Text('Your score: $score'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    startNewGame();
+                  },
+                  child: const Text('Play Again'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } else if (userInput.length == sequence.length) {
+      score++;
+      isUserTurn = false;
+      await highlightGesture(detectedGesture, Colors.green);
+      addNewGestureToSequence();
+    } else {
+      highlightGesture(detectedGesture, Colors.green);
+    }
+  }
+
+  void detectGesture(List<double> gyroData) {
     setState(() {
       _x = gyroData[0];
       _y = gyroData[1];
-      _z = gyroData[2];
+      // _z = gyroData[2];
 
       // the device orientation is as follows:
       // X is left
       // Y is backward
       // Z is down
 
-      // check which axis has the highest tilt
+      // check which axis has the highest abs input
       if (_x.abs() < _y.abs()) {
         checkLeftRightTilt(_y);
       } else {
@@ -98,8 +182,7 @@ class GamePageState extends State<GamePage> {
 
       if (gestureDetected) {
         canDetectGesture = false;
-        updateArrowColors(detectedGesture);
-        score++; // Increment score when a gesture is detected
+        checkUserInput(detectedGesture);
         Future.delayed(Duration(milliseconds: gestureCooldown), () {
           gestureDetected = false;
           canDetectGesture = true;
@@ -110,8 +193,9 @@ class GamePageState extends State<GamePage> {
   }
 
   void checkForwardBackwardTilt(double xVal) {
-    double gestureThreshold =
-        useESenseSensor ? gestureThresholdESense : gestureThresholdDevice;
+    double gestureThreshold = widget.useESenseSensor
+        ? gestureThresholdESense
+        : gestureThresholdDevice;
     if (xVal < -gestureThreshold) {
       detectedGesture = Gesture.tiltForward;
       gestureDetected = true;
@@ -124,8 +208,9 @@ class GamePageState extends State<GamePage> {
   }
 
   void checkLeftRightTilt(double yVal) {
-    double gestureThreshold =
-        useESenseSensor ? gestureThresholdESense : gestureThresholdDevice;
+    double gestureThreshold = widget.useESenseSensor
+        ? gestureThresholdESense
+        : gestureThresholdDevice;
     if (yVal < -gestureThreshold) {
       detectedGesture = Gesture.tiltLeft;
       gestureDetected = true;
@@ -137,90 +222,56 @@ class GamePageState extends State<GamePage> {
     }
   }
 
-  void updateArrowColors(Gesture gesture) {
-    switch (gesture) {
-      case Gesture.tiltForward:
-        forwardArrowColor = Colors.green;
-        break;
-      case Gesture.tiltBackward:
-        backwardArrowColor = Colors.green;
-        break;
-      case Gesture.tiltLeft:
-        leftArrowColor = Colors.green;
-        break;
-      case Gesture.tiltRight:
-        rightArrowColor = Colors.green;
-        break;
-      default:
-        break;
-    }
-  }
-
-  void resetArrowColors() {
-    forwardArrowColor = Colors.grey;
-    backwardArrowColor = Colors.grey;
-    leftArrowColor = Colors.grey;
-    rightArrowColor = Colors.grey;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Puzzle Game'),
+        title: const Text('Memory Game'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text('Score: $score', style: const TextStyle(fontSize: 24)),
-            const SizedBox(height: 30),
-            Container(
-              padding: const EdgeInsets.all(5),
-              decoration: BoxDecoration(
-                color: forwardArrowColor,
-                shape: BoxShape.circle,
-              ),
-              child:
-                  const Icon(Icons.arrow_upward, size: 60, color: Colors.white),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text('Score: $score', style: const TextStyle(fontSize: 24)),
+          ),
+          Expanded(
+            child: Center(
+              child: gameStarted
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        CircularIcon(
+                            icon: Icons.arrow_upward, color: forwardArrowColor),
+                        const SizedBox(height: 30),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularIcon(
+                                icon: Icons.arrow_back, color: leftArrowColor),
+                            const SizedBox(width: 130),
+                            CircularIcon(
+                                icon: Icons.arrow_forward,
+                                color: rightArrowColor),
+                          ],
+                        ),
+                        const SizedBox(height: 30),
+                        CircularIcon(
+                            icon: Icons.arrow_downward,
+                            color: backwardArrowColor),
+                      ],
+                    )
+                  : ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          gameStarted = true;
+                          startNewGame();
+                        });
+                      },
+                      child: const Text('Start Game'),
+                    ),
             ),
-            const SizedBox(height: 30),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    color: leftArrowColor,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.arrow_back,
-                      size: 60, color: Colors.white),
-                ),
-                const SizedBox(width: 121),
-                Container(
-                  padding: const EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    color: rightArrowColor,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.arrow_forward,
-                      size: 60, color: Colors.white),
-                ),
-              ],
-            ),
-            const SizedBox(height: 30),
-            Container(
-              padding: const EdgeInsets.all(5),
-              decoration: BoxDecoration(
-                color: backwardArrowColor,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.arrow_downward,
-                  size: 60, color: Colors.white),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
