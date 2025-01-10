@@ -59,6 +59,7 @@ class MyAppState extends State<MyApp> {
     _listenToESense();
   }
 
+  /// Starts listening to device sensor events
   StreamSubscription? deviceGyroSubscription;
   StreamSubscription? deviceAccSubscription;
   void _startListenToDeviceSensorEvents() {
@@ -81,11 +82,13 @@ class MyAppState extends State<MyApp> {
     );
   }
 
+  /// Pauses listening to device sensor events
   void _pauseListenToDeviceSensorEvents() {
     deviceGyroSubscription?.cancel();
     deviceAccSubscription?.cancel();
   }
 
+  /// Requests necessary permissions for Bluetooth and location
   Future<void> _askForPermissions() async {
     if (!(await Permission.bluetoothScan.request().isGranted &&
         await Permission.bluetoothConnect.request().isGranted)) {
@@ -100,6 +103,7 @@ class MyAppState extends State<MyApp> {
     }
   }
 
+  /// Listens to eSense connection events
   Future<void> _listenToESense() async {
     await _askForPermissions();
 
@@ -131,6 +135,7 @@ class MyAppState extends State<MyApp> {
     });
   }
 
+  /// Connects to the eSense device
   Future<void> _connectToESense() async {
     if (!eSenseConnected) {
       eSenseDeviceStatus = 'connecting...';
@@ -142,6 +147,7 @@ class MyAppState extends State<MyApp> {
     }
   }
 
+  /// Disconnects from the eSense device
   Future<void> _disconnectFromESense() async {
     if (eSenseConnected) {
       bool disconnected = await eSenseManager.disconnect();
@@ -153,6 +159,8 @@ class MyAppState extends State<MyApp> {
   }
 
   StreamSubscription? eSenseSubscription;
+
+  /// Starts listening to eSense sensor events
   void _startListenToESenseSensorEvents() async {
     if (!eSenseConnected) return;
 
@@ -194,10 +202,12 @@ class MyAppState extends State<MyApp> {
     });
   }
 
+  /// Pauses listening to eSense sensor events
   void _pauseListenToESenseSensorEvents() async {
     eSenseSubscription?.cancel();
   }
 
+  /// Starts sampling sensor data
   void _startSampling() {
     setState(() {
       sampling = true;
@@ -207,6 +217,7 @@ class MyAppState extends State<MyApp> {
     _startListenToDeviceSensorEvents();
   }
 
+  /// Stops sampling sensor data
   void _stopSampling() {
     setState(() {
       sampling = false;

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:settings_ui/settings_ui.dart';
 
+/// A page that displays various settings for the application.
 class SettingsPage extends StatelessWidget {
   final ValueChanged<bool> onToggleSensor;
   final ESenseManager eSenseManager;
@@ -17,6 +18,7 @@ class SettingsPage extends StatelessWidget {
   final double sensitivity;
   final ValueChanged<double> onSensitivityChanged;
 
+  /// Constructor for SettingsPage
   const SettingsPage({
     super.key,
     required this.useESenseSensor,

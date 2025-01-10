@@ -11,6 +11,7 @@ class GamePage extends StatefulWidget {
   final bool useESenseSensor;
   final double sensitivity;
 
+  /// Constructor for GamePage
   const GamePage({
     super.key,
     required this.gyroData,
@@ -83,6 +84,7 @@ class GamePageState extends State<GamePage> {
     _loadHighscore();
   }
 
+  /// Loads the highscore from shared preferences
   Future<void> _loadHighscore() async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -91,6 +93,7 @@ class GamePageState extends State<GamePage> {
     });
   }
 
+  /// Saves the highscore to shared preferences
   Future<void> _saveHighscore() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('highscore', highscore);
@@ -102,6 +105,7 @@ class GamePageState extends State<GamePage> {
     super.dispose();
   }
 
+  /// Starts a new game
   void startNewGame() async {
     statusMessage = "Get ready!";
     sequence.clear();
@@ -111,6 +115,7 @@ class GamePageState extends State<GamePage> {
     addNewGestureToSequence();
   }
 
+  /// Adds a new gesture to the sequence
   void addNewGestureToSequence() async {
     setState(() {
       sequence.add(Gesture.values[Random().nextInt(4)]);
@@ -123,6 +128,7 @@ class GamePageState extends State<GamePage> {
     });
   }
 
+  /// Plays the current sequence of gestures
   Future<void> playSequence() async {
     await Future.delayed(const Duration(milliseconds: 750));
     setState(() {
@@ -134,6 +140,7 @@ class GamePageState extends State<GamePage> {
     }
   }
 
+  /// Highlights a gesture with a specified color
   Future<void> highlightGesture(Gesture gesture, Color color) async {
     setState(() {
       switch (gesture) {
@@ -159,6 +166,7 @@ class GamePageState extends State<GamePage> {
     resetArrowColors();
   }
 
+  /// Resets the colors of the arrows
   void resetArrowColors() {
     forwardArrowColor = Colors.grey;
     backwardArrowColor = Colors.grey;
@@ -166,6 +174,7 @@ class GamePageState extends State<GamePage> {
     rightArrowColor = Colors.grey;
   }
 
+  /// Checks the user's input against the sequence
   void checkUserInput(Gesture gesture) async {
     if (!isUserTurn) return;
 
@@ -240,6 +249,7 @@ class GamePageState extends State<GamePage> {
     }
   }
 
+  /// Detects gestures based on gyro data
   void detectGesture(List<double> gyroData) {
     setState(() {
       _x = gyroData[0];
@@ -270,6 +280,7 @@ class GamePageState extends State<GamePage> {
     });
   }
 
+  /// Checks for forward or backward tilt
   void checkForwardBackwardTilt(double xVal) {
     double gestureThreshold = widget.useESenseSensor
         ? gestureThresholdESense
@@ -287,6 +298,7 @@ class GamePageState extends State<GamePage> {
     }
   }
 
+  /// Checks for left or right tilt
   void checkLeftRightTilt(double yVal) {
     double gestureThreshold = widget.useESenseSensor
         ? gestureThresholdESense
@@ -303,6 +315,7 @@ class GamePageState extends State<GamePage> {
     }
   }
 
+  /// Handles tap on the icon to start the game
   void handleIconTap() {
     if (!gameStarted) {
       setState(() {

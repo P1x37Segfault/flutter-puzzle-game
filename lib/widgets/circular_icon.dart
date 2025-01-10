@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// A widget that displays a circular icon with a specified color and an optional tap handler.
 class CircularIcon extends StatelessWidget {
   final IconData icon;
   final Color color;
